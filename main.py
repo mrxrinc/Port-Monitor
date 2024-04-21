@@ -4,7 +4,7 @@ from PyQt5.QtCore import QTimer
 import serial
 from serial.tools.list_ports_osx import comports
 
-TIMEOUT = 100
+TIMEOUT = 50
 
 class SerialPortWindow(QWidget):
     def __init__(self):
@@ -74,7 +74,7 @@ class SerialPortWindow(QWidget):
 
                 # Skip empty lines
                 if not line:
-                    return None      
+                    return
                    
                 line = self.colorize_logs(line)
                 self.log_text_edit.append(line)
