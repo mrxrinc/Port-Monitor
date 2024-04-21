@@ -5,6 +5,7 @@ import serial
 from serial.tools.list_ports_osx import comports
 
 TIMEOUT = 50
+BAUD_RATE = 115200
 
 class SerialPortWindow(QWidget):
     def __init__(self):
@@ -44,46 +45,66 @@ class SerialPortWindow(QWidget):
         main_layout.addLayout(right_layout)
 
         self.populate_serial_ports()
-        self.start_serial_monitor(self.combo_box.currentText())
 
     def on_combobox_changed(self):
         # Call start_serial_monitor with the currently selected port
         self.start_serial_monitor(self.combo_box.currentText())
         self.log_text_edit.clear()
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.logger)
+        self.timer.timeout.connect(self.populate_serial_ports)
+        self.timer.start(TIMEOUT)
 
     def populate_serial_ports(self):
         ports = [port.device for port in comports()]
-        if not ports:
+        current_ports = [self.combo_box.itemText(i) for i in range(self.combo_box.count())]
+
+        # Remove 'No serial ports found.' item if it exists
+        if 'No serial ports found.' in current_ports:
+            self.combo_box.removeItem(current_ports.index('No serial ports found.'))
+
+        # Add new ports
+        for port in ports:
+            if port not in current_ports:
+                self.combo_box.addItem(port)
+
+        if self.combo_box.count() == 0:
             self.combo_box.addItem('No serial ports found.')
-        else:
-            self.combo_box.addItems(ports)
 
     def start_serial_monitor(self, port):
-        if not port:
-            return None
-        self.port = port
-        self.serial_port = serial.Serial(port, baudrate=115200, timeout=TIMEOUT/1000)
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.logger)
-        self.timer.start(TIMEOUT)
+        try:
+            if not port:
+                return None
+            self.port = port
+            self.serial_port = serial.Serial(port, baudrate=BAUD_RATE, timeout=TIMEOUT/1000)
+        except (serial.SerialException, AttributeError, OSError):
+            self.serial_port = None
 
     def logger(self):
         try:
+            if not self.serial_port or not self.serial_port.is_open:
+                self.timer.stop()
+                message = 'Serial port is not open'
+                print(message)
+                self.log_text_edit.append(message)
+                return
+
             if self.serial_port.in_waiting > 0:
                 line = self.serial_port.readline().decode('utf-8', errors='ignore').strip()
 
                 # Skip empty lines
-                if not line:
-                    return
-                   
-                line = self.colorize_logs(line)
-                self.log_text_edit.append(line)
-                    
-        except serial.SerialException as e:
-            print(f'Could not open serial port: {e}')
+                if line:
+                    self.log_text_edit.append(self.colorize_logs(line))
+
+        except (serial.SerialException, AttributeError, OSError):
+            print('Serial port is not available.')
+            self.log_text_edit.append('Serial port is not available.')
+            self.serial_port = None
+
         except KeyboardInterrupt:
             print('\nExiting script')
-            self.serial_port.close()  # Close the serial port  
+            if self.serial_port and self.serial_port.is_open:
+                self.serial_port.close()
 
     def colorize_logs(_, line):
         if '[0;36mC' in line:
