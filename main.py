@@ -173,6 +173,8 @@ class SerialPortWindow(QWidget):
                 background-color: rgba(0, 120, 215, 0.15);
             }
         """)
+        self.port_list.setWordWrap(True)
+        self.port_list.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.port_list.currentItemChanged.connect(self.on_port_selected)
         left_layout.addWidget(self.port_list)
         
@@ -505,6 +507,23 @@ class SerialPortWindow(QWidget):
                 self.start_serial_monitor(port)
                 self.port_logs[port] = []
 
+        # Show empty message if no ports
+        if len(ports) == 0 and self.port_list.count() == 0:
+            self.port_list.addItem("No USB devices connected")
+            # Disable the placeholder item
+            item = self.port_list.item(0)
+            item.setFlags(item.flags() & ~Qt.ItemIsSelectable)
+            item.setTextAlignment(Qt.AlignCenter)
+            item.setForeground(QApplication.palette().color(self.port_list.foregroundRole()))
+            font = item.font()
+            font.setItalic(True)
+            item.setFont(font)
+        # Remove placeholder if ports are found
+        elif len(ports) > 0 and self.port_list.count() > 0:
+            first_item = self.port_list.item(0)
+            if first_item and first_item.text() == "No USB devices connected":
+                self.port_list.takeItem(0)
+
         # Restore selection if still available
         if current_selection_text and current_selection_text in ports:
             for i in range(self.port_list.count()):
@@ -512,7 +531,9 @@ class SerialPortWindow(QWidget):
                     self.port_list.setCurrentRow(i)
                     break
         elif self.port_list.count() > 0 and not current_selection:
-            self.port_list.setCurrentRow(0)
+            # Don't auto-select if it's the placeholder
+            if self.port_list.item(0).text() != "No USB devices connected":
+                self.port_list.setCurrentRow(0)
 
     def start_serial_monitor(self, port):
         try:
