@@ -30,12 +30,14 @@ A professional serial port monitoring application with CRC32 generation capabili
 ### Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/mrxrinc/port-monitor.git
    cd port-monitor
    ```
 
 2. **Create and activate virtual environment** (recommended)
+
    ```bash
    python3 -m venv venv
    source venv/bin/activate  # On macOS/Linux
@@ -59,20 +61,24 @@ python main.py
 ### Basic Operations
 
 1. **Monitor Serial Ports**
+
    - Connect USB devices to your computer
    - Ports appear automatically in the left panel
    - Click on a port to view its logs
 
 2. **Change Baud Rate**
+
    - Select desired baud rate from dropdown
    - All ports reconnect automatically
 
 3. **Calculate CRC32**
+
    - Click "Click or Drop File Here" button, or
    - Drag and drop a file onto the button
    - Click the result to copy CRC to clipboard
 
 4. **Reboot ESP32**
+
    - Select the port with your ESP32 device
    - Click "Reboot ESP32" button
 
@@ -109,6 +115,7 @@ pyinstaller --windowed --onefile --icon=icon.icns --name 'Port Monitor' main.py
 ```
 
 ⚠️ **Note:** Single file builds are not recommended because:
+
 - Slower startup time (needs to extract at runtime)
 - Larger file size
 - Potential antivirus false positives
@@ -171,6 +178,7 @@ LOG_FONT_SIZE = 14
 ## Troubleshooting
 
 ### Port Not Detected
+
 - Ensure the USB device is properly connected
 - Check that the device drivers are installed
 - On Linux, you may need to add your user to the `dialout` group:
@@ -180,10 +188,12 @@ LOG_FONT_SIZE = 14
   Then log out and back in.
 
 ### Permission Denied
+
 - On macOS/Linux, you may need to grant permissions to access serial ports
 - Check that you have read/write access to `/dev/tty.*` devices
 
 ### Application Won't Start
+
 - Verify Python version: `python --version` (should be 3.8+)
 - Reinstall dependencies: `pip install -r requirements.txt --force-reinstall`
 - Check for import errors: `python -c "from app.ui import MainWindow"`
@@ -191,6 +201,7 @@ LOG_FONT_SIZE = 14
 ## Development
 
 ### Running Tests
+
 ```bash
 # Run all tests (when implemented)
 pytest
@@ -200,14 +211,18 @@ pytest --cov=app
 ```
 
 ### Code Style
+
 This project follows PEP 8 style guidelines. Format code with:
+
 ```bash
 black app/
 flake8 app/
 ```
 
 ### Contributing
+
 Contributions are welcome! Please:
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
@@ -238,6 +253,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Version History
 
 ### v2.0.0 (Current)
+
 - ✨ Complete architecture refactor following SOLID principles
 - 🎨 Modular code structure for better maintainability
 - 📚 Comprehensive documentation
@@ -245,11 +261,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - 🔧 Configuration centralization
 
 ### v1.0.0
+
 - Initial release with basic monitoring features
 
 ---
 
 **Note:** For detailed architecture information and development guidelines, refer to:
+
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture and design patterns
 - [REFACTORING_SUMMARY.md](REFACTORING_SUMMARY.md) - Refactoring details
 - [ARCHITECTURE_FLOW.md](ARCHITECTURE_FLOW.md) - Component interaction diagrams
