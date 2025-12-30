@@ -436,7 +436,11 @@ class MainWindow(QWidget):
         self.port_logs[self.active_port].append(log_entry)
         self.log_text_edit.append(log_entry)
         
-        success = self.serial_service.reboot_esp32(self.active_port)
+        # Pass callback to handle completion
+        success = self.serial_service.reboot_esp32(
+            self.active_port, 
+            complete_callback=self._handle_reboot_completion
+        )
         
         if success:
             # Schedule completion after delay
@@ -449,6 +453,21 @@ class MainWindow(QWidget):
             )
             self.port_logs[self.active_port].append(error_msg)
             self.log_text_edit.append(error_msg)
+    
+    def _handle_reboot_completion(self, success: bool, error: str = None):
+        """Handle ESP32 reboot completion."""
+        if success:
+            log_entry = self.log_formatter.create_success_message(
+                'ESP32 rebooted successfully'
+            )
+        else:
+            log_entry = self.log_formatter.create_error_message(
+                f'Reboot completion failed: {error}'
+            )
+        
+        if self.active_port in self.port_logs:
+            self.port_logs[self.active_port].append(log_entry)
+            self.log_text_edit.append(log_entry)
     
     def _select_file_for_crc(self):
         """Open file dialog to select file for CRC calculation."""
